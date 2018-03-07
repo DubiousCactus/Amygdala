@@ -57,8 +57,10 @@ class Network:
 
     # Split the input data into 70% training and 30% testing
     def split_data(self):
+        print("[*] Splitting input elements")
         # Loop through each class and shuffle the inputs
         for class_, inputs in self.inputs.items():
+            print("\t-> Selecting training/testing data for class {}".format(class_))
             random.shuffle(inputs)
 
             self.training_data[class_] = []
@@ -119,6 +121,7 @@ class Network:
 if __name__ == "__main__":
     random.seed()
     # Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/sketchrnn
+    print("[*] Loading data sets")
     dataSets = {
         'swords': np.load('datasets/full_numpy_bitmap_sword.npy'),
         'skulls': np.load('datasets/full_numpy_bitmap_skull.npy'),
