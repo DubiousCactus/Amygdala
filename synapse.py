@@ -17,8 +17,8 @@ from neuron import Neuron
 
 class Synapse:
     
-    def __init__(self, frm, to):
-        self.neuronFrom = frm
+    def __init__(self, from_, to):
+        self.neuronFrom = from_
         self.neuronTo = to
         self.weight = random.random() # [0.0, 1.0)
 

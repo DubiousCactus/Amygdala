@@ -10,6 +10,7 @@
 Network class: assembles layers and implements the error correction / weight adjustment algorithms
 """
 
+import sys
 import random
 import numpy as np
 
@@ -22,7 +23,9 @@ class Network:
     inputLayer = None
     outputLayer = None
     hiddenLayers = []
-    inputs = []
+    inputs = {}
+    training_data = {}
+    test_data = []
 
     # Creates and inits layers
     def __init__(self, nbPixels, nbClasses, learningRate):
@@ -36,15 +39,41 @@ class Network:
 
 
     # Initialize the input layer's neurons
-    # Input format: [[ pixelVal, pixelVal, ... ], [ ... ], ... ]
+    # Input format:{
+    #    'class': [[ pixelVal, pixelVal, ... ], [ ... ], ... ],
+    #    ...
+    # }
     def set_inputs(self, inputs):
         try:
-            if length(inputs[i]) != self.inputLayer.size:
-                raise ValueException("Input size doesn't match")
-        except ValueError as error:
+            if len(next(iter(inputs.values()))[0]) != self.inputLayer.size:
+                raise AssertionError("Input size doesn't match")
+        except AssertionError as error:
             print("Error caught: " + repr(error))
+            sys.exit(1)
 
         self.inputs = inputs
+        self.split_data()
+
+
+    # Split the input data into 70% training and 30% testing
+    def split_data(self):
+        # Loop through each class and shuffle the inputs
+        for class_, inputs in self.inputs.items():
+            random.shuffle(inputs)
+
+            self.training_data[class_] = []
+            # Take the first 70% elements to use them as training data
+            for i in range(0, int(round(0.7 * len(inputs)))):
+                self.training_data[class_].append(inputs[i])
+
+            # The rest is of course the test data
+            for i in range(int(round(0.7 * len(inputs)) + 1), len(inputs)):
+                self.test_data.extend(inputs[i])
+
+        # Shuffle the test data
+        random.shuffle(self.test_data)
+        # Clear the inputs, they aren't need anymore
+        self.inputs.clear()
 
 
     def get_output(self):
@@ -97,11 +126,11 @@ if __name__ == "__main__":
         'pizzas': np.load('datasets/full_numpy_bitmap_pizza.npy')
     }
 
-    testImage = Image.fromarray(dataSets['swords'][0].reshape(28, 28))
-    testImage.resize((600, 600)).show()
+    # testImage = Image.fromarray(dataSets['swords'][0].reshape(28, 28))
+    # testImage.resize((600, 600)).show()
     
-    # neuralNetwork = Network(dataset.nbPixels, dataset.nbClasses, 5)
-    # neuralNetwork.set_input(dataSets)
+    neuralNetwork = Network(28*28, len(dataSets), 5)
+    neuralNetwork.set_inputs(dataSets)
     # neuralNetwork.train()
     
     # ...
