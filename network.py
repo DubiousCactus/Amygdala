@@ -23,22 +23,21 @@ class Network:
     inputs = []
 
     # Creates and inits layers
-    def __init__(self, nbNeurons, nbHiddenLayers, learningRate):
-        self.nbNeurons = nbNeurons
-        self.inputLayer = Layer(nbNeurons)
-        self.outputLayer = Layer(nbNeurons)
-
-        for i in range(0, nbHiddenLayers):
-            self.hiddenLayers.append(Layer(nbNeurons))
-
+    def __init__(self, nbPixels, nbClasses, learningRate):
+        self.inputLayer = Layer(nbPixels)
+        self.outputLayer = Layer(nbClasses)
         self.learningRate = learningRate
+
+
+    def add_hidden_layer(self, size):
+        hiddenLayers.append(Layer(size))
 
 
     # Initialize the input layer's neurons
     # Input format: [[ pixelVal, pixelVal, ... ], [ ... ], ... ]
     def set_inputs(self, inputs):
         try:
-            if length(inputs[i]) != self.nbNeurons:
+            if length(inputs[i]) != self.inputLayer.size:
                 raise ValueException("Input size doesn't match")
         except ValueError as error:
             print("Error caught: " + repr(error))
@@ -57,13 +56,11 @@ class Network:
 
     def train(self):
         for input in self.inputs:
-            for i in range(0, self.nbNeurons):
+            for i in range(0, self.inputLayer.size):
                 # Remember to normalize the inputs !
                 self.inputLayer.neurons[i].set_value(inputs[i])
             
-            # init output layer's neurons to -1 or 1 depending on test data
-            for neuron in self.outputLayer.neurons:
-                neuron.set_value(-1)
+            # init class vectors's values to -1 or 1 depending on the test class
 
 
             # Run the neural network for the current input
@@ -73,7 +70,7 @@ class Network:
             self.outputLayer.update_neurons()
 
             # Adjust weights
-            self.back_propagate()
+            self.back_propagate() # or self.mean_square_error()
 
 
 
@@ -87,7 +84,7 @@ class Network:
 if __name__ == "__main__":
     random.seed()
     dataset = DataSet(args[1])
-    neuralNetwork = Network()
+    neuralNetwork = Network(dataset.nbPixels, dataset.nbClasses, 5)
     neuralNetwork.set_input(dataset.parse_inputs())
     neuralNetwork.train()
     

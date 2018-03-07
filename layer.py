@@ -21,6 +21,7 @@ class Layer:
     previousLayer = None
 
     def __init__(self, nbNeurons):
+        self.size = nbNeurons
         for i in range(0, nbNeurons):
             self.neurons.append(Neuron())
 
