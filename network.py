@@ -20,6 +20,7 @@ class Network:
     inputLayer = None
     outputLayer = None
     hiddenLayers = []
+    inputs = []
 
     # Creates and inits layers
     def __init__(self, nbNeurons, nbHiddenLayers, learningRate):
@@ -34,17 +35,15 @@ class Network:
 
 
     # Initialize the input layer's neurons
-    # Input format: [ pixelVal, pixelVal, ... ]
-    def set_input(self, inputs):
+    # Input format: [[ pixelVal, pixelVal, ... ], [ ... ], ... ]
+    def set_inputs(self, inputs):
         try:
-            if length(inputs) != self.nbNeurons:
+            if length(inputs[i]) != self.nbNeurons:
                 raise ValueException("Input size doesn't match")
         except ValueError as error:
             print("Error caught: " + repr(error))
 
-        for i in range(0, nbNeurons):
-            # Remember to normalize the inputs !
-            inputLayer.neurons[i].set_value(inputs[i])
+        self.inputs = inputs
 
 
     def get_output(self):
@@ -57,7 +56,25 @@ class Network:
 
 
     def train(self):
-        # init output layer's neurons to -1 or 1 depending on test data
+        for input in self.inputs:
+            for i in range(0, self.nbNeurons):
+                # Remember to normalize the inputs !
+                self.inputLayer.neurons[i].set_value(inputs[i])
+            
+            # init output layer's neurons to -1 or 1 depending on test data
+            for neuron in self.outputLayer.neurons:
+                neuron.set_value(-1)
+
+
+            # Run the neural network for the current input
+            for layer in self.hiddenLayers:
+                layer.update_neurons()
+
+            self.outputLayer.update_neurons()
+
+            # Adjust weights
+            self.back_propagate()
+
 
 
     def classify(self):
@@ -69,6 +86,10 @@ class Network:
 
 if __name__ == "__main__":
     random.seed()
+    dataset = DataSet(args[1])
     neuralNetwork = Network()
+    neuralNetwork.set_input(dataset.parse_inputs())
+    neuralNetwork.train()
+    
     # ...
 
