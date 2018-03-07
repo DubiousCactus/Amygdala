@@ -8,6 +8,14 @@
 
 """
 Layer class: contains a list of neurons
+
+TODO:
+    Consider inheriting from this class for HiddenLayer, InputLayer, OutputLayer,
+    because:
+        - neurons should be a dict for the output layer, but a sequence for the others
+        - connect_to() isn't used at all for the input layer
+        - update_neurons() isn't used at all for the input layer
+    But is it clearer this way ?...
 """
 
 import math
@@ -19,11 +27,20 @@ class Layer:
 
     neurons = []
     previousLayer = None
+    classLabel = None # Only used if the layer is the output layer
 
-    def __init__(self, nbNeurons):
+    def __init__(self, nbNeurons, classes = None):
         self.size = nbNeurons
-        for i in range(0, nbNeurons):
-            self.neurons.append(Neuron())
+        
+        # For the output layer, set  the class labels on the neurons
+        if classes is not None:
+            self.neurons = {}
+            for class_ in classes:
+                self.neurons[class_] = Neuron()
+        # For every other layer, simply have a sequence of neurons
+        else:
+            for i in range(0, nbNeurons):
+                self.neurons.append(Neuron())
 
 
     # Connect this layer to the previous one by connecting synapses to each neurons

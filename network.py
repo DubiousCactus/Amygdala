@@ -24,8 +24,8 @@ class Network:
     outputLayer = None
     hiddenLayers = []
     inputs = {}
-    training_data = {}
-    test_data = []
+    trainingData = {}
+    testingData = []
 
     # Creates and inits layers
     def __init__(self, nbPixels, nbClasses, learningRate):
@@ -67,23 +67,23 @@ class Network:
             print("\t-> Selecting training/testing data for class: {}".format(class_))
             random.shuffle(inputs)
 
-            self.training_data[class_] = []
+            self.trainingData[class_] = []
             # Take the first 80% elements to use them as training data
             for i in range(0, int(round(0.8 * len(inputs)))):
-                self.training_data[class_].append(
+                self.trainingData[class_].append(
                     inputs[i] / 255 # Normalize values to [0,1]
                 )
 
             # The rest is of course the test data
             for i in range(int(round(0.8 * len(inputs)) + 1), len(inputs)):
-                self.test_data.extend(
+                self.testingData.extend(
                     inputs[i] / 255 # Normalize values to [0,1]
                 )
 
 
         print("[*] Shuffling testing data")
         # Shuffle the test data
-        random.shuffle(self.test_data)
+        random.shuffle(self.testingData)
         # Clear the inputs, they aren't need anymore
         del self.inputs
 
@@ -101,22 +101,29 @@ class Network:
 
 
     def train(self):
-        for input in self.inputs:
-            for i in range(0, self.inputLayer.size):
-                # Remember to normalize the inputs !
-                self.inputLayer.neurons[i].set_value(inputs[i])
-            
-            # init class vectors's values to -1 or 1 depending on the test class
+        expectedOutputs = []
+        for class_, elements in self.trainingData:
+            for element in elements:
+                # Setting the input neuronns' value to the pixels' value of the current
+                # element of the current class
+                for i in range(0, self.inputLayer.size):
+                    self.inputLayer.neurons[i].set_value(element[i])
+                
+                # Set the expected output layer's outputs' values accordingly
+                for outputNeuron in self.outputLayer.neurons:
+                    if outputNeuron.classLabel == class_:
+                        expectedOutputs[i] = 1
+                    else:
+                        expectedOutputs[i] = -1
 
+                # Run the neural network for the current input
+                for layer in self.hiddenLayers:
+                    layer.update_neurons()
 
-            # Run the neural network for the current input
-            for layer in self.hiddenLayers:
-                layer.update_neurons()
+                self.outputLayer.update_neurons()
 
-            self.outputLayer.update_neurons()
-
-            # Adjust weights
-            self.back_propagate() # or self.mean_square_error()
+                # Adjust weights
+                self.back_propagate() # or self.mean_square_error()
 
 
 
