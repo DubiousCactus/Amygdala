@@ -11,7 +11,9 @@ Network class: assembles layers and implements the error correction / weight adj
 """
 
 import random
+import numpy as np
 
+from PIL import Image
 from layer import Layer
 
 class Network:
@@ -46,12 +48,15 @@ class Network:
 
 
     def get_output(self):
+        return
 
 
     def back_propagate(self):
+        return
 
 
     def mean_square_error(self):
+        return
 
 
     def train(self):
@@ -75,18 +80,29 @@ class Network:
 
 
     def classify(self):
-
+        return
     
     def augment_data():
+        return
 
 
 
 if __name__ == "__main__":
     random.seed()
-    dataset = DataSet(args[1])
-    neuralNetwork = Network(dataset.nbPixels, dataset.nbClasses, 5)
-    neuralNetwork.set_input(dataset.parse_inputs())
-    neuralNetwork.train()
+    # Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/sketchrnn
+    dataSets = {
+        'swords': np.load('datasets/full_numpy_bitmap_sword.npy'),
+        'skulls': np.load('datasets/full_numpy_bitmap_skull.npy'),
+        'skateboards': np.load('datasets/full_numpy_bitmap_skateboard.npy'),
+        'pizzas': np.load('datasets/full_numpy_bitmap_pizza.npy')
+    }
+
+    testImage = Image.fromarray(dataSets['swords'][0].reshape(28, 28))
+    testImage.resize((600, 600)).show()
+    
+    # neuralNetwork = Network(dataset.nbPixels, dataset.nbClasses, 5)
+    # neuralNetwork.set_input(dataSets)
+    # neuralNetwork.train()
     
     # ...
 

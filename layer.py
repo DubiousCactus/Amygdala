@@ -44,7 +44,7 @@ class Layer:
     def update_neurons(self):
         for neuron in self.neurons:
             value = 0
-            for synapse in neuron.synapses
+            for synapse in neuron.synapses:
                 value += synapse.neuronFrom.value * synapse.weight
 
             value -= neuron.bias
