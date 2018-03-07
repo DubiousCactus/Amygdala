@@ -22,8 +22,7 @@ class Synapse:
         self.neuronTo = to
         self.weight = random.random() # [0.0, 1.0)
 
-
-    def set_weight(self, weight):
-        self.weight = weight
-
-
+    
+    # Adds a (positive or negative) value to the weight
+    def update_weight(self, value):
+        self.weight += value

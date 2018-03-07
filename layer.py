@@ -35,7 +35,7 @@ class Layer:
 
     # Squish the value into the interval [0,1]
     def squish(self, value):
-        # use sigmoid
+        # use the sigmoid function
         return 1 / (1 + math.exp(-value))
 
 

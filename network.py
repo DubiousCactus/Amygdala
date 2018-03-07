@@ -7,7 +7,7 @@
 # Distributed under terms of the MIT license.
 
 """
-Network class: assembles layers and implements  the backpropagation algorithm
+Network class: assembles layers and implements the error correction / weight adjustment algorithms
 """
 
 import random
@@ -23,6 +23,7 @@ class Network:
 
     # Creates and inits layers
     def __init__(self, nbNeurons, nbHiddenLayers, learningRate):
+        self.nbNeurons = nbNeurons
         self.inputLayer = Layer(nbNeurons)
         self.outputLayer = Layer(nbNeurons)
 
@@ -33,13 +34,26 @@ class Network:
 
 
     # Initialize the input layer's neurons
+    # Input format: [ pixelVal, pixelVal, ... ]
     def set_input(self, inputs):
+        try:
+            if length(inputs) != self.nbNeurons:
+                raise ValueException("Input size doesn't match")
+        except ValueError as error:
+            print("Error caught: " + repr(error))
+
+        for i in range(0, nbNeurons):
+            # Remember to normalize the inputs !
+            inputLayer.neurons[i].set_value(inputs[i])
 
 
     def get_output(self):
 
 
     def back_propagate(self):
+
+
+    def mean_square_error(self):
 
 
     def train(self):

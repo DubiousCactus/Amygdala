@@ -24,5 +24,10 @@ class Neuron:
         self.value = value
 
 
+    # Add a (positive or negative) value to the bias
+    def update_bias(self, value):
+        self.bias += value
+
+
     def connect_to(self, previousNeuron):
         self.synapses.append(Synapse(previousNeuron, self))
