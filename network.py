@@ -70,13 +70,18 @@ class Network:
             self.training_data[class_] = []
             # Take the first 80% elements to use them as training data
             for i in range(0, int(round(0.8 * len(inputs)))):
-                self.training_data[class_].append(inputs[i])
+                self.training_data[class_].append(
+                    inputs[i] / 255 # Normalize values to [0,1]
+                )
 
             # The rest is of course the test data
             for i in range(int(round(0.8 * len(inputs)) + 1), len(inputs)):
-                self.test_data.extend(inputs[i])
+                self.test_data.extend(
+                    inputs[i] / 255 # Normalize values to [0,1]
+                )
 
 
+        print("[*] Shuffling testing data")
         # Shuffle the test data
         random.shuffle(self.test_data)
         # Clear the inputs, they aren't need anymore
@@ -118,9 +123,6 @@ class Network:
     def classify(self):
         return
     
-    def augment_data():
-        return
-
 
 
 if __name__ == "__main__":
