@@ -55,27 +55,32 @@ class Network:
         self.split_data()
 
 
-    # Split the input data into 70% training and 30% testing
+    # Split the input data into 80% training and 20% testing
     def split_data(self):
         print("[*] Splitting input elements")
         # Loop through each class and shuffle the inputs
         for class_, inputs in self.inputs.items():
-            print("\t-> Selecting training/testing data for class {}".format(class_))
+            # Discard elemets above 75K index
+            # Trying with this first:
+            inputs = np.delete(inputs, np.s_[::2], 0)
+
+            print("\t-> Selecting training/testing data for class: {}".format(class_))
             random.shuffle(inputs)
 
             self.training_data[class_] = []
-            # Take the first 70% elements to use them as training data
-            for i in range(0, int(round(0.7 * len(inputs)))):
+            # Take the first 80% elements to use them as training data
+            for i in range(0, int(round(0.8 * len(inputs)))):
                 self.training_data[class_].append(inputs[i])
 
             # The rest is of course the test data
-            for i in range(int(round(0.7 * len(inputs)) + 1), len(inputs)):
+            for i in range(int(round(0.8 * len(inputs)) + 1), len(inputs)):
                 self.test_data.extend(inputs[i])
+
 
         # Shuffle the test data
         random.shuffle(self.test_data)
         # Clear the inputs, they aren't need anymore
-        self.inputs.clear()
+        del self.inputs
 
 
     def get_output(self):
@@ -120,7 +125,7 @@ class Network:
 
 if __name__ == "__main__":
     random.seed()
-    # Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/sketchrnn
+    # Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap/
     print("[*] Loading data sets")
     dataSets = {
         'swords': np.load('datasets/full_numpy_bitmap_sword.npy'),
@@ -134,6 +139,7 @@ if __name__ == "__main__":
     
     neuralNetwork = Network(28*28, len(dataSets), 5)
     neuralNetwork.set_inputs(dataSets)
+    del dataSets
     # neuralNetwork.train()
     
     # ...
