@@ -29,18 +29,17 @@ class Layer:
     previousLayer = None
     classLabel = None # Only used if the layer is the output layer
 
-    def __init__(self, nbNeurons, classes = None):
+    def __init__(self, nbNeurons):
         self.size = nbNeurons
-        
-        # For the output layer, set  the class labels on the neurons
-        if classes is not None:
-            self.neurons = {}
-            for class_ in classes:
-                self.neurons[class_] = Neuron()
-        # For every other layer, simply have a sequence of neurons
-        else:
-            for i in range(0, nbNeurons):
-                self.neurons.append(Neuron())
+        for i in range(0, nbNeurons):
+            self.neurons.append(Neuron())
+
+
+    # For the output layer, set the class labels on the neurons
+    def set_class_labels(self, classLabels):
+        self.neurons = {}
+        for class_ in classes:
+            self.neurons[class_] = Neuron()
 
 
     # Connect this layer to the previous one by connecting synapses to each neurons

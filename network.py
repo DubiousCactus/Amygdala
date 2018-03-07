@@ -52,6 +52,7 @@ class Network:
             sys.exit(1)
 
         self.inputs = inputs
+        self.outputLayer.set_class_labels(self.inputs.keys())
         self.split_data()
 
 
