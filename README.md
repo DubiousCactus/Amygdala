@@ -8,11 +8,19 @@ This project aims to demonstrate how neural networks work through a simple, clea
 
 
 # Deep learning
+This project implements a Deep Neural Network, or a multi-layer perceptron, with a few hidden layers.
 ## Algorithms
  * Back-propagation
  * Minimum square error
 
+## Data set
+This Neural Network is trained and tested on Google's [Quick, Draw!](https://github.com/googlecreativelab/quickdraw-dataset) data set. The `.pny` **Numpy** files are not included in this repo, therefore you have to download the ones you want to use from [here](https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap) (I recommend using about 4-5 classes/files).
+![preview](https://github.com/googlecreativelab/quickdraw-dataset/blob/master/preview.jpg?raw=true)
+
 
 # Todo
 
- - [ ] Everything
+ - [x] Write code base
+ - [ ] Write the backpropagation algorithm
+ - [ ] Write the minimum square error algorithm
+ - [ ] Code the GUI
