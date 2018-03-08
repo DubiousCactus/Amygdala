@@ -14,7 +14,6 @@ import sys
 import random
 import numpy as np
 
-from PIL import Image
 from layer import Layer
 
 class Network:
@@ -35,7 +34,7 @@ class Network:
 
 
     def add_hidden_layer(self, size):
-        hiddenLayers.append(Layer(size))
+        self.hiddenLayers.append(Layer(size))
 
 
     # Initialize the input layer's neurons
@@ -44,6 +43,7 @@ class Network:
     #    ...
     # }
     def set_inputs(self, inputs):
+        print("[*] Loading data sets")
         try:
             if len(next(iter(inputs.values()))[0]) != self.inputLayer.size:
                 raise AssertionError("Input size doesn't match")
@@ -68,22 +68,25 @@ class Network:
             print("\t-> Selecting training/testing data for class: {}".format(class_))
             random.shuffle(inputs)
 
-            self.trainingData[class_] = []
+            self.trainingData = []
             # Take the first 80% elements to use them as training data
             for i in range(0, int(round(0.8 * len(inputs)))):
-                self.trainingData[class_].append(
-                    inputs[i] / 255 # Normalize values to [0,1]
-                )
+                self.trainingData.append({
+                    'class': class_,
+                    'pixels': inputs[i] / 255 # Normalize values to [0,1]
+                })
 
             # The rest is of course the test data
             for i in range(int(round(0.8 * len(inputs)) + 1), len(inputs)):
-                self.testingData.extend(
-                    inputs[i] / 255 # Normalize values to [0,1]
-                )
+                self.testingData.extend({
+                    'class': '',
+                    'pixels': inputs[i] / 255 # Normalize values to [0,1]
+                })
 
 
+        print("[*] Shuffling training data")
+        random.shuffle(self.trainingData)
         print("[*] Shuffling testing data")
-        # Shuffle the test data
         random.shuffle(self.testingData)
         # Clear the inputs, they aren't need anymore
         del self.inputs
@@ -94,37 +97,37 @@ class Network:
 
 
     def back_propagate(self):
-        return
-
-
-    def mean_square_error(self):
+        # Use stochastic gradient descent
         return
 
 
     def train(self):
         expectedOutputs = []
-        for class_, elements in self.trainingData:
-            for element in elements:
-                # Setting the input neuronns' value to the pixels' value of the current
-                # element of the current class
-                for i in range(0, self.inputLayer.size):
-                    self.inputLayer.neurons[i].set_value(element[i])
-                
-                # Set the expected output layer's outputs' values accordingly
-                for outputNeuron in self.outputLayer.neurons:
-                    if outputNeuron.classLabel == class_:
-                        expectedOutputs[i] = 1
-                    else:
-                        expectedOutputs[i] = -1
+        for element in self.trainingData:
+            # Setting the input neuronns' value to the pixels' value of the current element
+            for i, inputNeuron in enumerate(self.inputLayer.neurons):
+                inputNeuron.set_value(element['pixels'][i])
+            
+            # Set the expected output layer's outputs' values accordingly
+            for outputNeuron in self.outputLayer.neurons:
+                if outputNeuron.classLabel == element['class']:
+                    expectedOutputs[i] = 1
+                else:
+                    expectedOutputs[i] = -1
 
-                # Run the neural network for the current input
-                for layer in self.hiddenLayers:
-                    layer.update_neurons()
+            # Run the neural network for the current input
+            for layer in self.hiddenLayers + self.outputLayer:
+                layer.update_neurons()
 
-                self.outputLayer.update_neurons()
+            # Calculate the error of this training element for output neuron
+            elementErrors = []
+            for i, outputNeuron in enumerate(self.outputLayer.neurons):
+                elementErrors.append(math.pow((outputNeuron.value - expectedOutputs[i]), 2))
 
-                # Adjust weights
-                self.back_propagate() # or self.mean_square_error()
+            errors.append(elementErrors)
+
+        # Adjust weights
+        self.back_propagate() # or self.mean_square_error()
 
 
 
@@ -136,20 +139,15 @@ class Network:
 if __name__ == "__main__":
     random.seed()
     # Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap/
-    print("[*] Loading data sets")
-    dataSets = {
+    neuralNetwork = Network(28*28, 4, 5)
+    neuralNetwork.add_hidden_layer(16)
+    neuralNetwork.add_hidden_layer(16)
+    neuralNetwork.set_inputs({
         'swords': np.load('datasets/full_numpy_bitmap_sword.npy'),
         'skulls': np.load('datasets/full_numpy_bitmap_skull.npy'),
         'skateboards': np.load('datasets/full_numpy_bitmap_skateboard.npy'),
         'pizzas': np.load('datasets/full_numpy_bitmap_pizza.npy')
-    }
-
-    # testImage = Image.fromarray(dataSets['swords'][0].reshape(28, 28))
-    # testImage.resize((600, 600)).show()
-    
-    neuralNetwork = Network(28*28, len(dataSets), 5)
-    neuralNetwork.set_inputs(dataSets)
-    del dataSets
+    })
     # neuralNetwork.train()
     
     # ...

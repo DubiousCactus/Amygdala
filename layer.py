@@ -38,7 +38,7 @@ class Layer:
     # For the output layer, set the class labels on the neurons
     def set_class_labels(self, classLabels):
         self.neurons = {}
-        for class_ in classes:
+        for class_ in classLabels:
             self.neurons[class_] = Neuron()
 
 
