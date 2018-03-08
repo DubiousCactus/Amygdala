@@ -148,7 +148,7 @@ if __name__ == "__main__":
         'skateboards': np.load('datasets/full_numpy_bitmap_skateboard.npy'),
         'pizzas': np.load('datasets/full_numpy_bitmap_pizza.npy')
     })
-    # neuralNetwork.train()
+    neuralNetwork.train()
     
     # ...
 

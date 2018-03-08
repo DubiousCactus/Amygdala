@@ -31,8 +31,7 @@ class Layer:
 
     def __init__(self, nbNeurons):
         self.size = nbNeurons
-        for i in range(0, nbNeurons):
-            self.neurons.append(Neuron())
+        self.neurons = [Neuron()] * nbNeurons
 
 
     # For the output layer, set the class labels on the neurons
