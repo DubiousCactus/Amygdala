@@ -32,6 +32,8 @@ class Network:
         self.outputLayer = Layer(nbClasses)
         self.learningRate = learningRate
 
+        # Don't forget to connect the layers !
+
 
     def add_hidden_layer(self, size):
         self.hiddenLayers.append(Layer(size))
@@ -109,8 +111,8 @@ class Network:
                 inputNeuron.set_value(element['pixels'][i])
             
             # Set the expected output layer's outputs' values accordingly
-            for outputNeuron in self.outputLayer.neurons:
-                if outputNeuron.classLabel == element['class']:
+            for classLabel, outputNeuron in self.outputLayer.neurons.items():
+                if classLabel == element['class']:
                     expectedOutputs[i] = 1
                 else:
                     expectedOutputs[i] = -1
