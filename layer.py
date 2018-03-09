@@ -18,7 +18,7 @@ TODO:
     But is it clearer this way ?...
 """
 
-import math
+import numpy as np
 
 from neuron import Neuron
 from synapse import Synapse
@@ -54,7 +54,7 @@ class Layer:
     # Squish the value into the interval [0,1]
     def squish(self, value):
         # use the sigmoid function
-        return 1 / (1 + math.exp(-value))
+        return 1 / (1 + np.exp(-value))
 
 
     # Updates the value of each neuron
@@ -69,7 +69,6 @@ class Layer:
             for synapse in neuron.synapses:
                 value += synapse.neuronFrom.value * synapse.weight
 
-            value += neuron.bias
-        neuron.set_value(self.squish(value))
+            neuron.set_value(self.squish(value + neuron.bias))
 
 

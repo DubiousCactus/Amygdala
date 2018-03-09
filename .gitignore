@@ -1,3 +1,4 @@
 dataset/
+.idea/
 __pycache__/*
 *.npy
