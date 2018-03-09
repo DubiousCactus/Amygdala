@@ -11,6 +11,7 @@ Network class: assembles layers and implements the error correction / weight adj
 """
 
 import sys
+import math
 import random
 import numpy as np
 
@@ -23,8 +24,9 @@ class Network:
     outputLayer = None
     hiddenLayers = []
     inputs = {}
-    trainingData = {}
+    trainingData = []
     testingData = []
+    connected = False
 
     # Creates and inits layers
     def __init__(self, nbPixels, nbClasses, learningRate):
@@ -36,7 +38,26 @@ class Network:
 
 
     def add_hidden_layer(self, size):
+        try:
+            if self.connected:
+                raise Exception("The network is already connected")
+        except Exception as error:
+            print("Error caught: " + repr(error))
+
         self.hiddenLayers.append(Layer(size))
+
+
+
+    # Connect the layers together
+    def connect(self):
+        # From the last layer to the first
+        allLayers = self.hiddenLayers + [self.outputLayer, self.inputLayer]
+        allLayers.reverse()
+        for i, layer in enumerate(allLayers):
+            if i + 2 < len(allLayers): # Stop at the layer before the first layer (in reversed order)
+                layer.connect_to(allLayers[i + 1])
+
+        self.connected = True
 
 
     # Initialize the input layer's neurons
@@ -70,7 +91,6 @@ class Network:
             print("\t-> Selecting training/testing data for class: {}".format(class_))
             random.shuffle(inputs)
 
-            self.trainingData = []
             # Take the first 80% elements to use them as training data
             for i in range(0, int(round(0.8 * len(inputs)))):
                 self.trainingData.append({
@@ -80,7 +100,7 @@ class Network:
 
             # The rest is of course the test data
             for i in range(int(round(0.8 * len(inputs)) + 1), len(inputs)):
-                self.testingData.extend({
+                self.testingData.append({
                     'class': '',
                     'pixels': inputs[i] / 255 # Normalize values to [0,1]
                 })
@@ -104,29 +124,31 @@ class Network:
 
 
     def train(self):
-        expectedOutputs = []
-        for element in self.trainingData:
+        expectedOutputs = {}
+        for index, element in enumerate(self.trainingData):
             # Setting the input neuronns' value to the pixels' value of the current element
             for i, inputNeuron in enumerate(self.inputLayer.neurons):
                 inputNeuron.set_value(element['pixels'][i])
             
+            expectedOutputs[index] = []
             # Set the expected output layer's outputs' values accordingly
-            for classLabel, outputNeuron in self.outputLayer.neurons.items():
+            for classLabel in self.outputLayer.neurons.keys():
                 if classLabel == element['class']:
-                    expectedOutputs[i] = 1
+                    expectedOutputs[index].append(1)
                 else:
-                    expectedOutputs[i] = -1
+                    expectedOutputs[index].append(-1)
 
             # Run the neural network for the current input
-            for layer in self.hiddenLayers + self.outputLayer:
-                layer.update_neurons()
+            for layer in self.hiddenLayers + [self.outputLayer]:
+                layer.feed_forward()
 
-            # Calculate the error of this training element for output neuron
+            # Calculate the error of this training element for output neurons
             elementErrors = []
-            for i, outputNeuron in enumerate(self.outputLayer.neurons):
-                elementErrors.append(math.pow((outputNeuron.value - expectedOutputs[i]), 2))
+            for i, outputNeuron in enumerate(list(self.outputLayer.neurons.values())):
+                elementErrors.append(math.pow((outputNeuron.value - expectedOutputs[index][i]), 2))
 
-            errors.append(elementErrors)
+            elementErrors.append(elementErrors)
+            print(elementErrors)
 
         # Adjust weights
         self.back_propagate() # or self.mean_square_error()
@@ -144,11 +166,12 @@ if __name__ == "__main__":
     neuralNetwork = Network(28*28, 4, 5)
     neuralNetwork.add_hidden_layer(16)
     neuralNetwork.add_hidden_layer(16)
+    neuralNetwork.connect()
     neuralNetwork.set_inputs({
-        'swords': np.load('datasets/full_numpy_bitmap_sword.npy'),
-        'skulls': np.load('datasets/full_numpy_bitmap_skull.npy'),
-        'skateboards': np.load('datasets/full_numpy_bitmap_skateboard.npy'),
-        'pizzas': np.load('datasets/full_numpy_bitmap_pizza.npy')
+        'sword': np.load('datasets/full_numpy_bitmap_sword.npy'),
+        'skull': np.load('datasets/full_numpy_bitmap_skull.npy'),
+        'skateboard': np.load('datasets/full_numpy_bitmap_skateboard.npy'),
+        'pizza': np.load('datasets/full_numpy_bitmap_pizza.npy')
     })
     neuralNetwork.train()
     

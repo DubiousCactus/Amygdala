@@ -10,6 +10,7 @@
 Neuron class
 """
 
+from synapse import Synapse
 
 class Neuron:
 

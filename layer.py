@@ -56,13 +56,18 @@ class Layer:
 
 
     # Updates the value of each neuron
-    def update_neurons(self):
-        for neuron in self.neurons:
+    def feed_forward(self):
+        if type(self.neurons) is dict: # For the output layer
+            neurons = list(self.neurons.values())
+        else: # For the other layers
+            neurons = self.neurons
+
+        for neuron in neurons:
             value = 0
             for synapse in neuron.synapses:
                 value += synapse.neuronFrom.value * synapse.weight
 
-            value -= neuron.bias
-            neuron.set_value(squish(value))
+            value += neuron.bias
+            neuron.set_value(self.squish(value))
 
 

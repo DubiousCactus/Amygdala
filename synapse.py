@@ -12,8 +12,6 @@ Synapse class: transfers data between neurons.
 
 import random
 
-from neuron import Neuron
-
 
 class Synapse:
     
