@@ -14,11 +14,11 @@ from synapse import Synapse
 
 class Neuron:
 
-    synapses = [] # A synapse is only contained in the neuron if its layer has a previous layer
 
     def __init__(self):
         self.value = 0
         self.bias = 0
+        self.synapses = [] # A synapse is only contained in the neuron if its layer has a previous layer
 
 
     def set_value(self, value):

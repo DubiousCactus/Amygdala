@@ -25,13 +25,15 @@ from synapse import Synapse
 
 class Layer:
 
-    neurons = []
-    previousLayer = None
-    classLabel = None # Only used if the layer is the output layer
 
     def __init__(self, nbNeurons):
+        self.neurons = []
         self.size = nbNeurons
-        self.neurons = [Neuron()] * nbNeurons
+        self.previousLayer = None
+        self.classLabel = None # Only used if the layer is the output layer
+
+        for i in range(nbNeurons):
+            self.neurons.append(Neuron())
 
 
     # For the output layer, set the class labels on the neurons
@@ -68,6 +70,6 @@ class Layer:
                 value += synapse.neuronFrom.value * synapse.weight
 
             value += neuron.bias
-            neuron.set_value(self.squish(value))
+        neuron.set_value(self.squish(value))
 
 

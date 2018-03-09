@@ -51,10 +51,9 @@ class Network:
     # Connect the layers together
     def connect(self):
         # From the last layer to the first
-        allLayers = self.hiddenLayers + [self.outputLayer, self.inputLayer]
-        allLayers.reverse()
+        allLayers = [self.outputLayer] + self.hiddenLayers[::-1] + [self.inputLayer]
         for i, layer in enumerate(allLayers):
-            if i + 2 < len(allLayers): # Stop at the layer before the first layer (in reversed order)
+            if i + 1 < len(allLayers): # Stop at the layer before the first layer (in reversed order)
                 layer.connect_to(allLayers[i + 1])
 
         self.connected = True
@@ -66,7 +65,6 @@ class Network:
     #    ...
     # }
     def set_inputs(self, inputs):
-        print("[*] Loading data sets")
         try:
             if len(next(iter(inputs.values()))[0]) != self.inputLayer.size:
                 raise AssertionError("Input size doesn't match")
@@ -167,6 +165,7 @@ if __name__ == "__main__":
     neuralNetwork.add_hidden_layer(16)
     neuralNetwork.add_hidden_layer(16)
     neuralNetwork.connect()
+    print("[*] Loading data sets")
     neuralNetwork.set_inputs({
         'sword': np.load('datasets/full_numpy_bitmap_sword.npy'),
         'skull': np.load('datasets/full_numpy_bitmap_skull.npy'),
