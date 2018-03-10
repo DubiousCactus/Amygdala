@@ -10,7 +10,7 @@
 Synapse class: transfers data between neurons.
 """
 
-import random
+import numpy as np
 
 
 class Synapse:
@@ -18,7 +18,7 @@ class Synapse:
     def __init__(self, from_, to):
         self.neuronFrom = from_
         self.neuronTo = to
-        self.weight = random.random() # [0.0, 1.0)
+        self.weight = (-1.0 - 1.0) * np.random.random_sample() + 1.0 # [-1.0, 1.0]
 
     
     # Adds a (positive or negative) value to the weight

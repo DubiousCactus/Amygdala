@@ -19,6 +19,7 @@ TODO:
 """
 
 import numpy as np
+import math
 
 from neuron import Neuron
 from synapse import Synapse
@@ -59,8 +60,8 @@ class Layer:
     # Activation function: squish the value into the interval [0,1]
     def squish(self, value):
         # use the sigmoid function
-        # return 1 / (1 + np.exp(-value))
-        return 0.5 * (1 + value / (1 + abs(value)))
+        return 1.0 / (1.0 + np.exp(-value))
+        # return 0.5 * (1 + value / (1 + abs(value)))
 
 
     # Updates the value of each neuron
