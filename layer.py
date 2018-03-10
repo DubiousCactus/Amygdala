@@ -45,16 +45,22 @@ class Layer:
 
     # Connect this layer to the previous one by connecting synapses to each neurons
     def connect_to(self, previousLayer):
+        if type(self.neurons) is dict: # For the output layer
+            neurons = list(self.neurons.values())
+        else: # For the other layers
+            neurons = self.neurons
+
         self.previousLayer = previousLayer
-        for neuron in self.neurons:
+        for neuron in neurons:
             for previousNeuron in self.previousLayer.neurons:
                 neuron.connect_to(previousNeuron)
 
 
-    # Squish the value into the interval [0,1]
+    # Activation function: squish the value into the interval [0,1]
     def squish(self, value):
         # use the sigmoid function
-        return 1 / (1 + np.exp(-value))
+        # return 1 / (1 + np.exp(-value))
+        return 0.5 * (1 + value / (1 + abs(value)))
 
 
     # Updates the value of each neuron

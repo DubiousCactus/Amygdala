@@ -50,6 +50,7 @@ class Network:
 
     # Connect the layers together
     def connect(self):
+        #BUG: The output layer is connected but then the neurons are overwritten which destroys the synapses...
         # From the last layer to the first
         allLayers = [self.outputLayer] + self.hiddenLayers[::-1] + [self.inputLayer]
         for i, layer in enumerate(allLayers):
@@ -142,11 +143,13 @@ class Network:
 
             # Calculate the error of this training element for output neurons
             elementErrors = []
+            print("[", end = "")
             for i, outputNeuron in enumerate(list(self.outputLayer.neurons.values())):
+                print(outputNeuron.value, end = " ")
                 elementErrors.append(math.pow((outputNeuron.value - expectedOutputs[index][i]), 2))
 
+            print("]")
             elementErrors.append(elementErrors)
-            print(elementErrors)
 
         # Adjust weights
         self.back_propagate() # or self.mean_square_error()
@@ -164,7 +167,6 @@ if __name__ == "__main__":
     neuralNetwork = Network(28*28, 4, 5)
     neuralNetwork.add_hidden_layer(16)
     neuralNetwork.add_hidden_layer(16)
-    neuralNetwork.connect()
     print("[*] Loading data sets")
     neuralNetwork.set_inputs({
         'sword': np.load('datasets/full_numpy_bitmap_sword.npy'),
@@ -172,6 +174,7 @@ if __name__ == "__main__":
         'skateboard': np.load('datasets/full_numpy_bitmap_skateboard.npy'),
         'pizza': np.load('datasets/full_numpy_bitmap_pizza.npy')
     })
+    neuralNetwork.connect()
     neuralNetwork.train()
     
     # ...
