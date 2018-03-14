@@ -28,6 +28,7 @@ class Layer:
 
 
     def __init__(self, nbNeurons):
+        self.bias = 0
         self.neurons = []
         self.size = nbNeurons
         self.previousLayer = None
@@ -76,6 +77,6 @@ class Layer:
             for synapse in neuron.synapses:
                 value += synapse.neuronFrom.value * synapse.weight
 
-            neuron.set_value(self.squish(value + neuron.bias))
+            neuron.set_value(self.squish(value + self.bias))
 
 

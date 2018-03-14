@@ -21,6 +21,6 @@ This Neural Network is trained and tested on Google's [Quick, Draw!](https://git
 # Todo
 
  - [x] Write code base
+ - [x] Write the feed forward algorithm
  - [ ] Write the backpropagation algorithm
- - [ ] Write the minimum square error algorithm
  - [ ] Code the GUI

@@ -19,6 +19,7 @@ from layer import Layer
 
 class Network:
 
+    totalError = 0
     learningRate = 0
     inputLayer = None
     outputLayer = None
@@ -118,8 +119,37 @@ class Network:
 
 
     def back_propagate(self):
-        # Use stochastic gradient descent
-        return
+        # TODO: Use mini-batches for the gradient descent
+        # TODO: Update the biases
+        # TODO: Implement this as a recursive function ?
+        
+        layers = [self.outputLayer] + self.hiddenLayers 
+        for currentLayer in layers:
+            for currentNeuron in currentLayer.neurons:
+                for synapse in currentNeuron.synapses:
+                    currentWeight = synapse.weight # TODO: Make sure I get this right...
+
+                    # Gradient of total error with respect to output neuron
+                    # (partial derivative of the mean squarred error with respect to the current output neuron)
+                    # Full version: 2 * (1/2 * (expected - output)^2) * -1 + 0 + 0 + ...
+                    gradientTotalErr_outputN = -(target - currentNeuron.value)
+
+                    # If not the output layer, account for the error of the following neurons connected to the current neuron
+                    for synapse in currentNeuron.synapses:
+                        while synapse.neuronTo.synapses.count() > 0:
+                            gradientTotalErr_outputN += 0 # ...
+
+                    # Gradient of the output neurron with respect to its net input value
+                    # In short: the partial derivative of the activation function
+                    gradientOutputN_netVal = currentNeuron.value * (1 - currentNeuron.value)
+
+                    # Gradient of the output's net value with respect to the current weight
+                    gradientNetVal_weight = currentNeuron.netVal * currentWeight
+
+                    # Gradient of the total error with respect to the current neuron
+                    gradientTotal = gradientTotalErr_outputN * gradientOutputN_netVal * gradientNetVal_weight
+
+                    newWeight = currentWeight - (gradientTotal * self.learningRate)
 
 
     def train(self):
@@ -142,17 +172,15 @@ class Network:
                 layer.feed_forward()
 
             # Calculate the error of this training element for output neurons
-            elementErrors = []
             print("[", end = "")
             for i, outputNeuron in enumerate(list(self.outputLayer.neurons.values())):
                 print(outputNeuron.value, end = " ")
-                elementErrors.append(math.pow((outputNeuron.value - expectedOutputs[index][i]), 2))
+                self.totalError += math.pow((outputNeuron.value - expectedOutputs[index][i]), 2) / 2 # Squarred error
 
             print("]")
-            elementErrors.append(elementErrors)
 
-        # Adjust weights
-        self.back_propagate() # or self.mean_square_error()
+        # Adjust weights and biases
+        self.back_propagate()
 
 
 
