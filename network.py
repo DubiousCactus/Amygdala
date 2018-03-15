@@ -34,6 +34,7 @@ class Network:
         self.inputLayer = Layer(nbPixels)
         self.outputLayer = Layer(nbClasses)
         self.learningRate = learningRate
+        self.expectedOutputs = {}
 
         # Don't forget to connect the layers !
 
@@ -121,67 +122,61 @@ class Network:
     def back_propagate(self):
         # TODO: Use mini-batches for the gradient descent
         # TODO: Update the biases
-        # TODO: Implement this as a recursive function ?
         
-        layers = [self.outputLayer] + self.hiddenLayers 
-        for currentLayer in layers:
-            for currentNeuron in currentLayer.neurons:
-                for synapse in currentNeuron.synapses:
-                    currentWeight = synapse.weight # TODO: Make sure I get this right...
+        # Okay let's do this from scratch now that I charged my brain
+        for layer in [self.outputLayer] + self.hiddenLayers:
+            for neuron in layer.neurons:
+                for synapse in neuron.synapses:
+                    errorForOutput = 0
+                    for i in range(self.outputLayer.size):
+                        errorForOutput += -(self.expectedOutputs[i] - self.outputLayer.neurons[i].value) * self.outputLayer.neurons[i].value(1 - self.outputLayer.neurons[i].value) * synapse.weight
 
-                    # Gradient of total error with respect to output neuron
-                    # (partial derivative of the mean squarred error with respect to the current output neuron)
-                    # Full version: 2 * (1/2 * (expected - output)^2) * -1 + 0 + 0 + ...
-                    gradientTotalErr_outputN = -(target - currentNeuron.value)
+                    neuronValForNeuronNet = neuron.value * (1 - neuron.value) # Partial derivative of the activation function
+                    neuronNetForNeuronWeight = synapse.neuronFrom.value # Partial derivative
+                    errorSignal = errorForOutput * neuronValForNeuronNet * neuronNetForNeuronWeight
+                    synapse.updatedWeight += -self.learningRate * errorSignal
+                    print("weight: " + synapse.weight + " --> " + synapse.updatedWeight) 
 
-                    # If not the output layer, account for the error of the following neurons connected to the current neuron
-                    for synapse in currentNeuron.synapses:
-                        while synapse.neuronTo.synapses.count() > 0:
-                            gradientTotalErr_outputN += 0 # ...
-
-                    # Gradient of the output neurron with respect to its net input value
-                    # In short: the partial derivative of the activation function
-                    gradientOutputN_netVal = currentNeuron.value * (1 - currentNeuron.value)
-
-                    # Gradient of the output's net value with respect to the current weight
-                    gradientNetVal_weight = currentNeuron.netVal * currentWeight
-
-                    # Gradient of the total error with respect to the current neuron
-                    gradientTotal = gradientTotalErr_outputN * gradientOutputN_netVal * gradientNetVal_weight
-
-                    newWeight = currentWeight - (gradientTotal * self.learningRate)
-
+        # Now apply the updated weights !
+        for layer in [self.outputLayer] + self.hiddenLayers:
+            for neuron in layer.neurons:
+                for synapse in neuron.synapses:
+                    synapse.weight = synapse.updatedWeight
+    
 
     def train(self):
-        expectedOutputs = {}
+        lenTraining = len(self.trainingData)
+        print("[*] Training neural network...")
+        print("\t-> Forward propagation...")
         for index, element in enumerate(self.trainingData):
             # Setting the input neuronns' value to the pixels' value of the current element
             for i, inputNeuron in enumerate(self.inputLayer.neurons):
                 inputNeuron.set_value(element['pixels'][i])
             
-            expectedOutputs[index] = []
+            self.expectedOutputs[index] = []
             # Set the expected output layer's outputs' values accordingly
             for classLabel in self.outputLayer.neurons.keys():
                 if classLabel == element['class']:
-                    expectedOutputs[index].append(1)
+                    self.expectedOutputs[index].append(1)
                 else:
-                    expectedOutputs[index].append(-1)
+                    self.expectedOutputs[index].append(-1)
 
             # Run the neural network for the current input
             for layer in self.hiddenLayers + [self.outputLayer]:
                 layer.feed_forward()
 
             # Calculate the error of this training element for output neurons
-            print("[", end = "")
             for i, outputNeuron in enumerate(list(self.outputLayer.neurons.values())):
-                print(outputNeuron.value, end = " ")
-                self.totalError += math.pow((outputNeuron.value - expectedOutputs[index][i]), 2) / 2 # Squarred error
+                self.totalError += math.pow((outputNeuron.value - self.expectedOutputs[index][i]), 2) / 2 # Squarred error
+            
+            if (lenTraining / (index + 1)) % 10 == 0:
+                print("\t\t- " + lenTraining / index + "%")
 
-            print("]")
 
         # Adjust weights and biases
+        print("\t-> Back propagation...")
         self.back_propagate()
-
+        print("[*] Done !")
 
 
     def classify(self):
