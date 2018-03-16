@@ -13,6 +13,7 @@ Network class: assembles layers and implements the error correction / weight adj
 import sys
 import math
 import random
+import progressbar
 import numpy as np
 
 from layer import Layer
@@ -147,6 +148,8 @@ class Network:
         lenTraining = len(self.trainingData)
         print("[*] Training neural network...")
         print("\t-> Forward propagation...")
+        bar = progressbar.ProgressBar(maxval=len(self.trainingData), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+        bar.start()
         for index, element in enumerate(self.trainingData):
             # Setting the input neuronns' value to the pixels' value of the current element
             for i, inputNeuron in enumerate(self.inputLayer.neurons):
@@ -168,10 +171,10 @@ class Network:
             for i, outputNeuron in enumerate(list(self.outputLayer.neurons.values())):
                 self.totalError += math.pow((outputNeuron.value - self.expectedOutputs[index][i]), 2) / 2 # Squarred error
             
-            if (lenTraining / (index + 1)) % 10 == 0:
-                print("\t\t- " + str(int(lenTraining / (index+1))) + "%")
+            bar.update(index + 1)
 
 
+        bar.finish()
         # Adjust weights and biases
         print("\t-> Back propagation...")
         self.back_propagate()
