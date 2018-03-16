@@ -31,10 +31,11 @@ class Network:
     connected = False
 
     # Creates and inits layers
-    def __init__(self, nbPixels, nbClasses, learningRate):
+    def __init__(self, nbPixels, samplesPerClass, nbClasses, learningRate):
         self.inputLayer = Layer(nbPixels)
         self.outputLayer = Layer(nbClasses)
         self.learningRate = learningRate
+        self.samplesPerClass = samplesPerClass
         self.expectedOutputs = {}
 
         # Don't forget to connect the layers !
@@ -86,8 +87,8 @@ class Network:
         print("[*] Splitting input elements")
         # Loop through each class and shuffle the inputs
         for class_, inputs in self.inputs.items():
-            # Only keep 20 000 elements per class
-            inputs = inputs[range(20000)]
+            # Only keep N elements per class
+            inputs = inputs[range(self.samplesPerClass)]
 
             print("\t-> Selecting training/testing data for class: {}".format(class_))
             random.shuffle(inputs)
@@ -123,23 +124,37 @@ class Network:
         # TODO: Use mini-batches for the gradient descent
         # TODO: Update the biases
         
+        n = 0
         # Okay let's do this from scratch now that I charged my brain
         for layer in [self.outputLayer] + self.hiddenLayers:
-            for neuron in layer.neurons:
+            if type(layer.neurons) is dict: # For the output layer
+                neurons = list(layer.neurons.values())
+            else: # For the other layers
+                neurons = layer.neurons
+            
+            for neuron in neurons:
                 for synapse in neuron.synapses:
                     errorForOutput = 0
+                    outputNeurons = list(self.outputLayer.neurons.values())
                     for i in range(self.outputLayer.size):
-                        errorForOutput += -(self.expectedOutputs[i] - self.outputLayer.neurons[i].value) * self.outputLayer.neurons[i].value(1 - self.outputLayer.neurons[i].value) * synapse.weight
+                        # This should probably not be expectedOutputs ... But the error of each individual output ?
+                        errorForOutput += -(self.expectedOutputs[n][i] - outputNeurons[i].value) * outputNeurons[i].value * (1 - outputNeurons[i].value) * synapse.weight
 
                     neuronValForNeuronNet = neuron.value * (1 - neuron.value) # Partial derivative of the activation function
                     neuronNetForNeuronWeight = synapse.neuronFrom.value # Partial derivative
                     errorSignal = errorForOutput * neuronValForNeuronNet * neuronNetForNeuronWeight
                     synapse.updatedWeight += -self.learningRate * errorSignal
-                    print("weight: " + synapse.weight + " --> " + synapse.updatedWeight) 
+                    n += 1
+                    print("weight: " + str(synapse.weight) + " --> " + str(synapse.updatedWeight)) 
 
         # Now apply the updated weights !
         for layer in [self.outputLayer] + self.hiddenLayers:
-            for neuron in layer.neurons:
+            if type(layer.neurons) is dict: # For the output layer
+                neurons = list(layer.neurons.values())
+            else: # For the other layers
+                neurons = layer.neurons
+            
+            for neuron in neurons:
                 for synapse in neuron.synapses:
                     synapse.weight = synapse.updatedWeight
     
@@ -189,9 +204,9 @@ class Network:
 if __name__ == "__main__":
     random.seed()
     # Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap/
-    neuralNetwork = Network(28*28, 4, 5)
-    neuralNetwork.add_hidden_layer(16)
-    neuralNetwork.add_hidden_layer(16)
+    neuralNetwork = Network(28*28, 5000, 4, 5)
+    # neuralNetwork.add_hidden_layer(16)
+    # neuralNetwork.add_hidden_layer(16)
     print("[*] Loading data sets")
     neuralNetwork.set_inputs({
         'sword': np.load('datasets/full_numpy_bitmap_sword.npy'),

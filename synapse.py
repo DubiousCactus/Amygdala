@@ -19,6 +19,7 @@ class Synapse:
         self.neuronFrom = from_
         self.neuronTo = to
         self.weight = (-1.0 - 1.0) * np.random.random_sample() + 1.0 # [-1.0, 1.0]
+        self.updatedWeight = 0
 
     
     # Adds a (positive or negative) value to the weight
