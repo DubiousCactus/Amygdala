@@ -85,9 +85,8 @@ class Network:
         print("[*] Splitting input elements")
         # Loop through each class and shuffle the inputs
         for class_, inputs in self.inputs.items():
-            # Discard elemets above 75K index
-            # Trying with this first:
-            inputs = np.delete(inputs, np.s_[::2], 0)
+            # Only keep 20 000 elements per class
+            inputs = inputs[range(20000)]
 
             print("\t-> Selecting training/testing data for class: {}".format(class_))
             random.shuffle(inputs)
@@ -170,7 +169,7 @@ class Network:
                 self.totalError += math.pow((outputNeuron.value - self.expectedOutputs[index][i]), 2) / 2 # Squarred error
             
             if (lenTraining / (index + 1)) % 10 == 0:
-                print("\t\t- " + lenTraining / index + "%")
+                print("\t\t- " + str(int(lenTraining / (index+1))) + "%")
 
 
         # Adjust weights and biases
