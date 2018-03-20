@@ -36,7 +36,7 @@ class Network:
         self.outputLayer = Layer(nbClasses)
         self.learningRate = learningRate
         self.samplesPerClass = samplesPerClass
-        self.expectedOutputs = {}
+        self.expectedOutputs = []
 
         # Don't forget to connect the layers !
 
@@ -124,7 +124,6 @@ class Network:
         # TODO: Use mini-batches for the gradient descent
         # TODO: Update the biases
         
-        n = 0
         # Okay let's do this from scratch now that I charged my brain
         for layer in [self.outputLayer] + self.hiddenLayers:
             if type(layer.neurons) is dict: # For the output layer
@@ -138,13 +137,12 @@ class Network:
                     outputNeurons = list(self.outputLayer.neurons.values())
                     for i in range(self.outputLayer.size):
                         # This should probably not be expectedOutputs ... But the error of each individual output ?
-                        errorForOutput += -(self.expectedOutputs[n][i] - outputNeurons[i].value) * outputNeurons[i].value * (1 - outputNeurons[i].value) * synapse.weight
+                        errorForOutput += -(self.expectedOutputs[i] - outputNeurons[i].value) * outputNeurons[i].value * (1 - outputNeurons[i].value) * synapse.weight
 
                     neuronValForNeuronNet = neuron.value * (1 - neuron.value) # Partial derivative of the activation function
                     neuronNetForNeuronWeight = synapse.neuronFrom.value # Partial derivative
                     errorSignal = errorForOutput * neuronValForNeuronNet * neuronNetForNeuronWeight
                     synapse.updatedWeight += -self.learningRate * errorSignal
-                    n += 1
                     print("weight: " + str(synapse.weight) + " --> " + str(synapse.updatedWeight)) 
 
         # Now apply the updated weights !
@@ -170,13 +168,13 @@ class Network:
             for i, inputNeuron in enumerate(self.inputLayer.neurons):
                 inputNeuron.set_value(element['pixels'][i])
             
-            self.expectedOutputs[index] = []
+            self.expectedOutputs = []
             # Set the expected output layer's outputs' values accordingly
             for classLabel in self.outputLayer.neurons.keys():
                 if classLabel == element['class']:
-                    self.expectedOutputs[index].append(1)
+                    self.expectedOutputs.append(1)
                 else:
-                    self.expectedOutputs[index].append(-1)
+                    self.expectedOutputs.append(-1)
 
             # Run the neural network for the current input
             for layer in self.hiddenLayers + [self.outputLayer]:
@@ -184,15 +182,15 @@ class Network:
 
             # Calculate the error of this training element for output neurons
             for i, outputNeuron in enumerate(list(self.outputLayer.neurons.values())):
-                self.totalError += math.pow((outputNeuron.value - self.expectedOutputs[index][i]), 2) / 2 # Squarred error
+                self.totalError += math.pow((outputNeuron.value - self.expectedOutputs[i]), 2) / 2 # Squarred error
             
+            # Adjust weights and biases
+            print("\t-> Back propagation...")
+            self.back_propagate()
             bar.update(index + 1)
 
 
         bar.finish()
-        # Adjust weights and biases
-        print("\t-> Back propagation...")
-        self.back_propagate()
         print("[*] Done !")
 
 
@@ -204,7 +202,7 @@ class Network:
 if __name__ == "__main__":
     random.seed()
     # Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap/
-    neuralNetwork = Network(28*28, 5000, 4, 5)
+    neuralNetwork = Network(28*28, 1000, 4, 0.5)
     # neuralNetwork.add_hidden_layer(16)
     # neuralNetwork.add_hidden_layer(16)
     print("[*] Loading data sets")
