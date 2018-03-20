@@ -136,14 +136,13 @@ class Network:
                     errorForOutput = 0
                     outputNeurons = list(self.outputLayer.neurons.values())
                     for i in range(self.outputLayer.size):
-                        # This should probably not be expectedOutputs ... But the error of each individual output ?
                         errorForOutput += -(self.expectedOutputs[i] - outputNeurons[i].value) * outputNeurons[i].value * (1 - outputNeurons[i].value) * synapse.weight
 
                     neuronValForNeuronNet = neuron.value * (1 - neuron.value) # Partial derivative of the activation function
                     neuronNetForNeuronWeight = synapse.neuronFrom.value # Partial derivative
                     errorSignal = errorForOutput * neuronValForNeuronNet * neuronNetForNeuronWeight
                     synapse.updatedWeight += -self.learningRate * errorSignal
-                    print("weight: " + str(synapse.weight) + " --> " + str(synapse.updatedWeight)) 
+                    # print("weight: " + str(synapse.weight) + " --> " + str(synapse.updatedWeight)) 
 
         # Now apply the updated weights !
         for layer in [self.outputLayer] + self.hiddenLayers:
@@ -158,7 +157,6 @@ class Network:
     
 
     def train(self):
-        lenTraining = len(self.trainingData)
         print("[*] Training neural network...")
         print("\t-> Forward propagation...")
         bar = progressbar.ProgressBar(maxval=len(self.trainingData), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
@@ -185,7 +183,6 @@ class Network:
                 self.totalError += math.pow((outputNeuron.value - self.expectedOutputs[i]), 2) / 2 # Squarred error
             
             # Adjust weights and biases
-            print("\t-> Back propagation...")
             self.back_propagate()
             bar.update(index + 1)
 
@@ -195,9 +192,29 @@ class Network:
 
 
     def classify(self):
-        return
-    
+        print("[*] Classifying testing samples...")
+        bar = progressbar.ProgressBar(maxval=len(self.testingData), widgets=[progressbar.Bar('=', '[', ']', ' ', progressbar.Percentage())])
+        bar.start()
+        successfulGuesses = 0
+        for index, element in enumerate(self.testingData):
+            # Setting the input neuronns' value to the pixels' value of the current element
+            for i, inputNeuron in enumerate(self.inputLayer.neurons):
+                inputNeuron.set_value(element['pixels'][i])
+            
+            # Run the neural network for the current input
+            for layer in self.hiddenLayers + [self.outputLayer]:
+                layer.feed_forward()
 
+            # Check if it got it right
+            if np.argmax([neuron.value for neuron in self.outputLayer.neurons]) == element['class']:
+                successfulGuesses += 1
+
+            bar.update(index + 1)
+
+        bar.finish()
+        print("[*] Done !")
+        print("[*] Success rate: {}%".format(successfulGuesses / len(self.testingData) * 100))
+            
 
 if __name__ == "__main__":
     random.seed()
@@ -214,6 +231,6 @@ if __name__ == "__main__":
     })
     neuralNetwork.connect()
     neuralNetwork.train()
-    
+    neuralNetwork.classify()
     # ...
 
