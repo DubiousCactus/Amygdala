@@ -54,7 +54,7 @@ class Network:
 
     # Connect the layers together
     def connect(self):
-        #BUG: The output layer is connected but then the neurons are overwritten which destroys the synapses...
+        # BUG: The output layer is connected but then the neurons are overwritten which destroys the synapses...
         # From the last layer to the first
         allLayers = [self.outputLayer] + self.hiddenLayers[::-1] + [self.inputLayer]
         for i, layer in enumerate(allLayers):
@@ -103,7 +103,7 @@ class Network:
             # The rest is of course the test data
             for i in range(int(round(0.8 * len(inputs)) + 1), len(inputs)):
                 self.testingData.append({
-                    'class': '',
+                    'class': class_,
                     'pixels': inputs[i] / 255 # Normalize values to [0,1]
                 })
 
@@ -139,9 +139,11 @@ class Network:
                         errorForOutput += -(self.expectedOutputs[i] - outputNeurons[i].value) * outputNeurons[i].value * (1 - outputNeurons[i].value) * synapse.weight
 
                     neuronValForNeuronNet = neuron.value * (1 - neuron.value) # Partial derivative of the activation function
-                    neuronNetForNeuronWeight = synapse.neuronFrom.value # Partial derivative
+                    neuronNetForNeuronWeight = synapse.neuronFrom.value # Partial derivative TODO: FIX THIS BUG !!! It is always equal to 0 (see bug in connect() maybe)
+                    # TODO: Actually, it's not a bug... the input neuron's value might be zero you know :/ So I added 0.0001 to make sure that it's never 0. Change the activation function ?
+                    # Change the normalization of inputs ?
                     errorSignal = errorForOutput * neuronValForNeuronNet * neuronNetForNeuronWeight
-                    synapse.updatedWeight += -self.learningRate * errorSignal
+                    synapse.updatedWeight = synapse.weight - (self.learningRate * errorSignal)
                     # print("weight: " + str(synapse.weight) + " --> " + str(synapse.updatedWeight)) 
 
         # Now apply the updated weights !
@@ -158,7 +160,6 @@ class Network:
 
     def train(self):
         print("[*] Training neural network...")
-        print("\t-> Forward propagation...")
         bar = progressbar.ProgressBar(maxval=len(self.trainingData), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
         bar.start()
         for index, element in enumerate(self.trainingData):
@@ -192,7 +193,7 @@ class Network:
 
 
     def classify(self):
-        print("[*] Classifying testing samples...")
+        print("[*] Classifying test samples...")
         bar = progressbar.ProgressBar(maxval=len(self.testingData), widgets=[progressbar.Bar('=', '[', ']', ' ', progressbar.Percentage())])
         bar.start()
         successfulGuesses = 0
@@ -206,20 +207,20 @@ class Network:
                 layer.feed_forward()
 
             # Check if it got it right
-            if np.argmax([neuron.value for neuron in self.outputLayer.neurons]) == element['class']:
+            if list(self.outputLayer.neurons.keys())[np.argmax([neuron.value for neuron in list(self.outputLayer.neurons.values())])] == element['class']:
                 successfulGuesses += 1
 
             bar.update(index + 1)
 
         bar.finish()
         print("[*] Done !")
-        print("[*] Success rate: {}%".format(successfulGuesses / len(self.testingData) * 100))
+        print("[*] Success rate: {}%".format(round(successfulGuesses / len(self.testingData) * 100)))
             
 
 if __name__ == "__main__":
     random.seed()
     # Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap/
-    neuralNetwork = Network(28*28, 1000, 4, 0.5)
+    neuralNetwork = Network(28*28, 5000, 4, 0.001)
     # neuralNetwork.add_hidden_layer(16)
     # neuralNetwork.add_hidden_layer(16)
     print("[*] Loading data sets")
