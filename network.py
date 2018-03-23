@@ -38,8 +38,6 @@ class Network:
         self.samplesPerClass = samplesPerClass
         self.expectedOutputs = []
 
-        # Don't forget to connect the layers !
-
 
     def add_hidden_layer(self, size):
         try:
@@ -54,7 +52,6 @@ class Network:
 
     # Connect the layers together
     def connect(self):
-        # BUG: The output layer is connected but then the neurons are overwritten which destroys the synapses...
         # From the last layer to the first
         allLayers = [self.outputLayer] + self.hiddenLayers[::-1] + [self.inputLayer]
         for i, layer in enumerate(allLayers):
@@ -80,9 +77,10 @@ class Network:
         self.inputs = inputs
         self.outputLayer.set_class_labels(self.inputs.keys())
         self.split_data()
+        self.connect()
 
 
-    # Split the input data into 80% training and 20% testing
+    # Split the input data into 70% training and 30% testing
     def split_data(self):
         print("[*] Splitting input elements")
         # Loop through each class and shuffle the inputs
@@ -94,14 +92,15 @@ class Network:
             random.shuffle(inputs)
 
             # Take the first 80% elements to use them as training data
-            for i in range(0, int(round(0.8 * len(inputs)))):
+            nbSamples = int(round(0.7 * len(inputs)))
+            for i in range(0, nbSamples):
                 self.trainingData.append({
                     'class': class_,
                     'pixels': inputs[i] / 255 # Normalize values to [0,1]
                 })
 
             # The rest is of course the test data
-            for i in range(int(round(0.8 * len(inputs)) + 1), len(inputs)):
+            for i in range(nbSamples, len(inputs)):
                 self.testingData.append({
                     'class': class_,
                     'pixels': inputs[i] / 255 # Normalize values to [0,1]
@@ -116,22 +115,22 @@ class Network:
         del self.inputs
 
 
-    def get_output(self):
-        return
-
-
     def back_propagate(self):
         # TODO: Use mini-batches for the gradient descent
         # TODO: Update the biases
         
-        # Okay let's do this from scratch now that I charged my brain
-        for layer in [self.outputLayer] + self.hiddenLayers:
-            if type(layer.neurons) is dict: # For the output layer
-                neurons = list(layer.neurons.values())
-            else: # For the other layers
-                neurons = layer.neurons
-            
-            for neuron in neurons:
+        # For the output layer:
+        for i, neuron in enumerate(list(self.outputLayer.neurons.values())):
+            for synapse in neuron.synapses:
+                errorForOutput = -(self.expectedOutputs[i] - neuron.value) # Gradient of the total error with respect to the output of the neuron
+                neuronValForNeuronNet = neuron.value * (1 - neuron.value) # Partial derivative of the activation function
+                neuronNetForNeuronWeight = synapse.neuronFrom.value # Gradient of the net input with respect to the weight
+                errorSignal = errorForOutput * neuronValForNeuronNet * neuronNetForNeuronWeight
+                synapse.updatedWeight = synapse.weight - (self.learningRate * errorSignal)
+
+        # For the hidden layers:
+        for layer in self.hiddenLayers:
+            for neuron in layer.neurons:
                 for synapse in neuron.synapses:
                     errorForOutput = 0
                     outputNeurons = list(self.outputLayer.neurons.values())
@@ -140,10 +139,8 @@ class Network:
 
                     neuronValForNeuronNet = neuron.value * (1 - neuron.value) # Partial derivative of the activation function
                     neuronNetForNeuronWeight = synapse.neuronFrom.value # Partial derivative 
-                    # Change the normalization of inputs ? (neuronNetForNeuronWeight can be equal to zero, thus making the error signal zero...)
                     errorSignal = errorForOutput * neuronValForNeuronNet * neuronNetForNeuronWeight
                     synapse.updatedWeight = synapse.weight - (self.learningRate * errorSignal)
-                    # print("weight: " + str(synapse.weight) + " --> " + str(synapse.updatedWeight)) 
 
         # Now apply the updated weights !
         for layer in [self.outputLayer] + self.hiddenLayers:
@@ -191,7 +188,7 @@ class Network:
         print("[*] Done !")
 
 
-    def classify(self):
+    def test(self):
         print("[*] Classifying test samples...")
         bar = progressbar.ProgressBar(maxval=len(self.testingData), widgets=[progressbar.Bar('=', '[', ']', ' ', progressbar.Percentage())])
         bar.start()
@@ -219,9 +216,9 @@ class Network:
 if __name__ == "__main__":
     random.seed()
     # Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap/
-    neuralNetwork = Network(28*28, 5000, 4, 0.5)
-    # neuralNetwork.add_hidden_layer(16)
-    # neuralNetwork.add_hidden_layer(16)
+    neuralNetwork = Network(28*28, 5000, 4, 0.35)
+    neuralNetwork.add_hidden_layer(64)
+    # neuralNetwork.add_hidden_layer(32)
     print("[*] Loading data sets")
     neuralNetwork.set_inputs({
         'sword': np.load('datasets/full_numpy_bitmap_sword.npy'),
@@ -229,8 +226,6 @@ if __name__ == "__main__":
         'skateboard': np.load('datasets/full_numpy_bitmap_skateboard.npy'),
         'pizza': np.load('datasets/full_numpy_bitmap_pizza.npy')
     })
-    neuralNetwork.connect()
     neuralNetwork.train()
-    neuralNetwork.classify()
-    # ...
+    neuralNetwork.test()
 
