@@ -19,7 +19,6 @@ TODO:
 """
 
 import numpy as np
-import math
 
 from neuron import Neuron
 from synapse import Synapse
@@ -31,7 +30,6 @@ class Layer:
         self.bias = 0
         self.neurons = []
         self.size = nbNeurons
-        self.previousLayer = None
         self.classLabel = None # Only used if the layer is the output layer
 
         for i in range(nbNeurons):
@@ -45,24 +43,22 @@ class Layer:
             self.neurons[class_] = Neuron()
 
 
-    # Connect this layer to the previous one by connecting synapses to each neurons
-    def connect_to(self, previousLayer):
-        if type(self.neurons) is dict: # For the output layer
-            neurons = list(self.neurons.values())
+    # Connect this layer to the next one by connecting synapses to each neurons
+    def connect_to(self, nextLayer):
+        if type(nextLayer.neurons) is dict: # For the output layer
+            nextNeurons = list(nextLayer.neurons.values())
         else: # For the other layers
-            neurons = self.neurons
+            nextNeurons = nextLayer.neurons
 
-        self.previousLayer = previousLayer
-        for neuron in neurons:
-            for previousNeuron in self.previousLayer.neurons:
-                neuron.connect_to(previousNeuron)
+        for neuron in self.neurons:
+            for nextNeuron in nextNeurons:
+                neuron.connect_to(nextNeuron)
+                nextNeuron.connect_from(neuron)
 
 
-    # Activation function: squish the value into the interval [0,1]
+    # Activation function: squish the value into the interval [0,1] using the sigmoid function
     def squish(self, value):
-        # use the sigmoid function
         return 1.0 / (1.0 + np.exp(-value))
-        # return 0.5 * (1 + value / (1 + abs(value)))
 
 
     # Updates the value of each neuron
@@ -74,8 +70,8 @@ class Layer:
 
         for neuron in neurons:
             value = 0
-            for synapse in neuron.synapses:
-                value += synapse.neuronFrom.value * synapse.weight
+            for synapse in neuron.synapses_from:
+                value += synapse.neuron.value * synapse.weight
 
             neuron.set_value(self.squish(value + self.bias))
 

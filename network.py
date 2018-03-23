@@ -52,10 +52,10 @@ class Network:
 
     # Connect the layers together
     def connect(self):
-        # From the last layer to the first
-        allLayers = [self.outputLayer] + self.hiddenLayers[::-1] + [self.inputLayer]
+        # From the first layer to the last
+        allLayers = [self.inputLayer] + self.hiddenLayers + [self.outputLayer]
         for i, layer in enumerate(allLayers):
-            if i + 1 < len(allLayers): # Stop at the layer before the first layer (in reversed order)
+            if i + 1 < len(allLayers): # Stop at the layer before the last layer 
                 layer.connect_to(allLayers[i + 1])
 
         self.connected = True
@@ -121,24 +121,25 @@ class Network:
         
         # For the output layer:
         for i, neuron in enumerate(list(self.outputLayer.neurons.values())):
-            for synapse in neuron.synapses:
+            for synapse in neuron.synapses_from:
                 errorForOutput = -(self.expectedOutputs[i] - neuron.value) # Gradient of the total error with respect to the output of the neuron
                 neuronValForNeuronNet = neuron.value * (1 - neuron.value) # Partial derivative of the activation function
-                neuronNetForNeuronWeight = synapse.neuronFrom.value # Gradient of the net input with respect to the weight
+                neuronNetForNeuronWeight = synapse.neuron.value # Gradient of the net input with respect to the weight
                 errorSignal = errorForOutput * neuronValForNeuronNet * neuronNetForNeuronWeight
                 synapse.updatedWeight = synapse.weight - (self.learningRate * errorSignal)
 
+        # TODO: Fix this because it will most likely only work for one hidden layer...
         # For the hidden layers:
         for layer in self.hiddenLayers:
             for neuron in layer.neurons:
-                for synapse in neuron.synapses:
+                for synapse in neuron.synapses_from:
                     errorForOutput = 0
                     outputNeurons = list(self.outputLayer.neurons.values())
                     for i in range(self.outputLayer.size):
-                        errorForOutput += -(self.expectedOutputs[i] - outputNeurons[i].value) * outputNeurons[i].value * (1 - outputNeurons[i].value) * synapse.weight
+                        errorForOutput += -(self.expectedOutputs[i] - outputNeurons[i].value) * outputNeurons[i].value * (1 - outputNeurons[i].value) * synapse.weight # Probably the wrong synapse/weight !! We want the weight of the following synpase !
 
                     neuronValForNeuronNet = neuron.value * (1 - neuron.value) # Partial derivative of the activation function
-                    neuronNetForNeuronWeight = synapse.neuronFrom.value # Partial derivative 
+                    neuronNetForNeuronWeight = synapse.neuron.value # Partial derivative 
                     errorSignal = errorForOutput * neuronValForNeuronNet * neuronNetForNeuronWeight
                     synapse.updatedWeight = synapse.weight - (self.learningRate * errorSignal)
 
@@ -150,7 +151,7 @@ class Network:
                 neurons = layer.neurons
             
             for neuron in neurons:
-                for synapse in neuron.synapses:
+                for synapse in neuron.synapses_from:
                     synapse.weight = synapse.updatedWeight
     
 
@@ -216,9 +217,9 @@ class Network:
 if __name__ == "__main__":
     random.seed()
     # Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap/
-    neuralNetwork = Network(nbPixels = 28*28, samplesPerClass = 5000, nbClasses = 4, learningRate = 0.35)
-    neuralNetwork.add_hidden_layer(64)
-    # neuralNetwork.add_hidden_layer(32)
+    neuralNetwork = Network(nbPixels = 28*28, samplesPerClass = 500, nbClasses = 4, learningRate = 0.3)
+    # neuralNetwork.add_hidden_layer(16)
+    # neuralNetwork.add_hidden_layer(16)
     print("[*] Loading data sets")
     neuralNetwork.set_inputs({
         'sword': np.load('datasets/full_numpy_bitmap_sword.npy'),
@@ -226,6 +227,8 @@ if __name__ == "__main__":
         'skateboard': np.load('datasets/full_numpy_bitmap_skateboard.npy'),
         'pizza': np.load('datasets/full_numpy_bitmap_pizza.npy')
     })
-    neuralNetwork.train()
-    neuralNetwork.test()
+    # For 5 epochs
+    for i in range(5):
+        neuralNetwork.train()
+        neuralNetwork.test()
 

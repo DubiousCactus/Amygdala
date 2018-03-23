@@ -17,7 +17,8 @@ class Neuron:
 
     def __init__(self):
         self.value = 0
-        self.synapses = [] # A synapse is only contained in the neuron if its layer has a previous layer
+        self.synapses_from = [] # Those synapses lead to the neurons of the next layer
+        self.synapses_to = [] # Those synapses lead to the neurons of the previous layer
 
 
     def set_value(self, value):
@@ -29,5 +30,8 @@ class Neuron:
         self.bias += value
 
 
-    def connect_to(self, previousNeuron):
-        self.synapses.append(Synapse(previousNeuron, self))
+    def connect_to(self, nextNeuron):
+        self.synapses_to.append(Synapse(nextNeuron))
+
+    def connect_from(self, previousNeuron):
+        self.synapses_from.append(Synapse(previousNeuron))
