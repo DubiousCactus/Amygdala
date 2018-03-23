@@ -139,9 +139,8 @@ class Network:
                         errorForOutput += -(self.expectedOutputs[i] - outputNeurons[i].value) * outputNeurons[i].value * (1 - outputNeurons[i].value) * synapse.weight
 
                     neuronValForNeuronNet = neuron.value * (1 - neuron.value) # Partial derivative of the activation function
-                    neuronNetForNeuronWeight = synapse.neuronFrom.value # Partial derivative TODO: FIX THIS BUG !!! It is always equal to 0 (see bug in connect() maybe)
-                    # TODO: Actually, it's not a bug... the input neuron's value might be zero you know :/ So I added 0.0001 to make sure that it's never 0. Change the activation function ?
-                    # Change the normalization of inputs ?
+                    neuronNetForNeuronWeight = synapse.neuronFrom.value # Partial derivative 
+                    # Change the normalization of inputs ? (neuronNetForNeuronWeight can be equal to zero, thus making the error signal zero...)
                     errorSignal = errorForOutput * neuronValForNeuronNet * neuronNetForNeuronWeight
                     synapse.updatedWeight = synapse.weight - (self.learningRate * errorSignal)
                     # print("weight: " + str(synapse.weight) + " --> " + str(synapse.updatedWeight)) 
@@ -220,7 +219,7 @@ class Network:
 if __name__ == "__main__":
     random.seed()
     # Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap/
-    neuralNetwork = Network(28*28, 5000, 4, 0.001)
+    neuralNetwork = Network(28*28, 5000, 4, 0.5)
     # neuralNetwork.add_hidden_layer(16)
     # neuralNetwork.add_hidden_layer(16)
     print("[*] Loading data sets")
