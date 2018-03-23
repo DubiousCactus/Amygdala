@@ -136,7 +136,7 @@ class Network:
                     errorForOutput = 0
                     outputNeurons = list(self.outputLayer.neurons.values())
                     for i in range(self.outputLayer.size):
-                        errorForOutput += -(self.expectedOutputs[i] - outputNeurons[i].value) * outputNeurons[i].value * (1 - outputNeurons[i].value) * synapse.weight # Probably the wrong synapse/weight !! We want the weight of the following synpase !
+                        errorForOutput += -(self.expectedOutputs[i] - outputNeurons[i].value) * outputNeurons[i].value * (1 - outputNeurons[i].value) * neuron.synapses_to[i].weight 
 
                     neuronValForNeuronNet = neuron.value * (1 - neuron.value) # Partial derivative of the activation function
                     neuronNetForNeuronWeight = synapse.neuron.value # Partial derivative 
@@ -217,8 +217,8 @@ class Network:
 if __name__ == "__main__":
     random.seed()
     # Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap/
-    neuralNetwork = Network(nbPixels = 28*28, samplesPerClass = 500, nbClasses = 4, learningRate = 0.3)
-    # neuralNetwork.add_hidden_layer(16)
+    neuralNetwork = Network(nbPixels = 28*28, samplesPerClass = 500, nbClasses = 4, learningRate = 0.2)
+    neuralNetwork.add_hidden_layer(324)
     # neuralNetwork.add_hidden_layer(16)
     print("[*] Loading data sets")
     neuralNetwork.set_inputs({

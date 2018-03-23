@@ -49,6 +49,7 @@ Finally, simply run it as an executable:
  - [x] Write code base
  - [x] Write the feed forward algorithm
  - [x] Write the backpropagation algorithm
+ - [ ] Fix the backpropagation algorithm for hidden layers
  - [ ] Improve the speeeeeeed
  - [ ] Code the GUI
 
