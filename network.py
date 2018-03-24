@@ -217,8 +217,8 @@ class Network:
 if __name__ == "__main__":
     random.seed()
     # Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap/
-    neuralNetwork = Network(nbPixels = 28*28, samplesPerClass = 500, nbClasses = 4, learningRate = 0.2)
-    neuralNetwork.add_hidden_layer(324)
+    neuralNetwork = Network(nbPixels = 28*28, samplesPerClass = 5000, nbClasses = 4, learningRate = 0.2)
+    neuralNetwork.add_hidden_layer(64)
     # neuralNetwork.add_hidden_layer(16)
     print("[*] Loading data sets")
     neuralNetwork.set_inputs({
