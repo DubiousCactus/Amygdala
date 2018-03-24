@@ -217,15 +217,14 @@ class Network:
 if __name__ == "__main__":
     random.seed()
     # Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap/
-    neuralNetwork = Network(nbPixels = 28*28, samplesPerClass = 5000, nbClasses = 4, learningRate = 0.2)
+    neuralNetwork = Network(nbPixels = 28*28, samplesPerClass = 20000, nbClasses = 3, learningRate = 0.2)
     neuralNetwork.add_hidden_layer(64)
-    # neuralNetwork.add_hidden_layer(16)
+    neuralNetwork.add_hidden_layer(16)
     print("[*] Loading data sets")
     neuralNetwork.set_inputs({
         'sword': np.load('datasets/full_numpy_bitmap_sword.npy'),
         'skull': np.load('datasets/full_numpy_bitmap_skull.npy'),
-        'skateboard': np.load('datasets/full_numpy_bitmap_skateboard.npy'),
-        'pizza': np.load('datasets/full_numpy_bitmap_pizza.npy')
+        'skateboard': np.load('datasets/full_numpy_bitmap_skateboard.npy')
     })
     # For 5 epochs
     for i in range(5):

@@ -14,7 +14,7 @@ This project implements a Deep Neural Network, or a multi-layer perceptron, with
  * Back-propagation
 
 ## Data set
-This Neural Network is trained and tested on Google's [Quick, Draw!](https://github.com/googlecreativelab/quickdraw-dataset) data set. The `.pny` **Numpy** files are not included in this repo, therefore you have to download the ones you want to use from [here](https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap) (I recommend using about 4-5 classes/files).
+This Neural Network is trained and tested on Google's [Quick, Draw!](https://github.com/googlecreativelab/quickdraw-dataset) data set. The `.pny` **Numpy** files are not included in this repo, therefore you have to download the ones you want to use from [here](https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap) (I recommend using about 3-4 classes/files).
 ![preview](https://github.com/googlecreativelab/quickdraw-dataset/blob/master/preview.jpg?raw=true)
 
 # How to use
@@ -24,15 +24,14 @@ Then, change the main function of `network.py` to load your input data and set t
 	if __name__ == "__main__":
 		random.seed()
 		# Using npz files from https://console.cloud.google.com/storage/browser/quickdraw_dataset/full/numpy_bitmap/
-		neuralNetwork = Network(nbPixels = 28*28, samplesPerClass = 5000, nbClasses = 4, learningRate = 0.35)
+		neuralNetwork = Network(nbPixels = 28*28, samplesPerClass = 10000, nbClasses = 3, learningRate = 0.35)
 		neuralNetwork.add_hidden_layer(64)
 		neuralNetwork.add_hidden_layer(32)
 		print("[*] Loading data sets")
 		neuralNetwork.set_inputs({
 			'sword': np.load('datasets/full_numpy_bitmap_sword.npy'),
 			'skull': np.load('datasets/full_numpy_bitmap_skull.npy'),
-			'skateboard': np.load('datasets/full_numpy_bitmap_skateboard.npy'),
-			'pizza': np.load('datasets/full_numpy_bitmap_pizza.npy')
+			'skateboard': np.load('datasets/full_numpy_bitmap_skateboard.npy')
 		})
 		neuralNetwork.train()
 		neuralNetwork.test()
@@ -49,7 +48,7 @@ Finally, simply run it as an executable:
  - [x] Write code base
  - [x] Write the feed forward algorithm
  - [x] Write the backpropagation algorithm
- - [ ] Fix the backpropagation algorithm for hidden layers
+ - [ ] Fix the backpropagation algorithm for more than one hidden layers
  - [ ] Improve the speeeeeeed
  - [ ] Code the GUI
 
