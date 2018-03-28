@@ -73,6 +73,6 @@ class Layer:
             for synapse in neuron.synapses_from:
                 value += synapse.neuron.value * synapse.weight
 
-            neuron.set_value(self.squish(value + self.bias))
+            neuron.value = self.squish(value + self.bias)
 
 

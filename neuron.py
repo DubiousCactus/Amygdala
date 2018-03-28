@@ -21,10 +21,6 @@ class Neuron:
         self.synapses_to = [] # Those synapses lead to the neurons of the previous layer
 
 
-    def set_value(self, value):
-        self.value = value
-
-
     # Add a (positive or negative) value to the bias
     def update_bias(self, value):
         self.bias += value
